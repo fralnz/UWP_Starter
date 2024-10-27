@@ -16,6 +16,7 @@ using Windows.UI.ViewManagement;
 using Windows.Foundation;
 using System.Reflection;
 using Windows.UI.Popups;
+using System.IO;
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
 namespace UserRegistry.Views
@@ -32,6 +33,7 @@ namespace UserRegistry.Views
             LoadCredentialsAsync(); // Esecuzione metodo per il caricamento delle credenziali nella
                                     // lista listCredentials. Il metodo è asincrono e viene eseguito
                                     // al caricamento della pagina.
+            loadSession();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -66,7 +68,11 @@ namespace UserRegistry.Views
 
         private async void LoginBtn(object sender, RoutedEventArgs e)
         {
-            if (chkNewUser.IsChecked == true)
+            if (sessionBtn.IsChecked == true)
+            {
+                CreateSession(Username.Text);
+            }
+                if (chkNewUser.IsChecked == true)
             {
                 if (await RegisterNewUser()) // Se nuovo utente registrato con successo, si passa alla pagina di Register.
                     Frame.Navigate(typeof(NavigatorPage), Username.Text);
@@ -113,6 +119,7 @@ namespace UserRegistry.Views
                     });
 
                     await FileManager.WriteToJsonFile(listCredentials, "credentials.json", true);
+                    // C:\Users\franc\AppData\Local\Packages\5a6c4944-6d2b-4aa4-b5a6-a3b733fa2754_xhfdsb7egwnd2\LocalState
                     result = true; // Assegnamento del valore true alla variabile result.
                 }
                 else 
@@ -154,7 +161,7 @@ namespace UserRegistry.Views
 
         private bool CheckNotExistNewUser(string encryptedInputPwd)
         {
-            bool rsult = false;
+            bool result = false;
 
             if (listCredentials.Find
                 (usr => usr.Username.ToLower().Equals(Username.Text.ToLower())) == null)
@@ -162,17 +169,85 @@ namespace UserRegistry.Views
                 Debug.WriteLine("Admin logged in at: " + DateTime.Now);
                 Console.WriteLine("Admin logged in at: " + DateTime.Now);
                 Frame.Navigate(typeof(NavigatorPage), Username.Text);
-                rsult = true;
+                result = true;
             }
             else
             {
                 MessageDialog dialog = new("Utente Già registrato.Mofificare lo Username");
                 _ = dialog.ShowAsync();
-                rsult = false;
+                result = false;
             }
 
-            return rsult;
+            return result;
         }
+
+        private string CheckSession()
+        {
+            string sessionFilePath = "session";
+            // Let's print the full path to see where it's actually looking
+            string fullPath = Path.GetFullPath(sessionFilePath);
+            Debug.WriteLine($"Looking for file at: {fullPath}");
+
+            // Print the current directory to understand the context
+            Debug.WriteLine($"Current Directory: {Directory.GetCurrentDirectory()}");
+
+            if (!File.Exists(sessionFilePath))
+            {
+                Debug.WriteLine("File not found!");
+                return "";
+            }
+
+            string sessionContent = File.ReadAllText(sessionFilePath);
+            Debug.WriteLine($"Session content: {sessionContent}");
+            return sessionContent;
+        }
+
+        private async void CreateSession(string username)
+        {
+            try
+            {
+                StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+                StorageFile sessionFile = await localFolder.CreateFileAsync("session.txt", CreationCollisionOption.ReplaceExisting);
+
+                // Scrivi l'username nel file
+                await FileIO.WriteTextAsync(sessionFile, username);
+            }
+            catch (Exception ex)
+            {
+                // Gestione delle eccezioni (fatta male)
+                Debug.WriteLine($"Error creating session: {ex.Message}");
+            }
+        }
+
+        private void DeleteSession()
+        {
+            string sessionFilePath = "session";
+            File.Delete(sessionFilePath);
+        }
+
+        private void loadSession()
+        {
+            string user = CheckSession();
+            if (string.IsNullOrEmpty(user))
+            {
+                return; // Nessuna sessione, tanto vale uscire
+            }
+
+            // Controlla se l'utente esiste in listCredentials.
+            var existingUser = listCredentials.Find(usr => usr.Username.Equals(user, StringComparison.OrdinalIgnoreCase));
+
+            if (existingUser != null)
+            {
+                // Utente esiste
+                Debug.WriteLine("Auto-login for user: " + user + " at: " + DateTime.Now);
+                Frame.Navigate(typeof(NavigatorPage), user);
+            }
+            else
+            {
+                DeleteSession();
+            }
+        }
+
 
         private async Task<bool> CheckExistLoginUser(string encryptedInputPwd)
         {

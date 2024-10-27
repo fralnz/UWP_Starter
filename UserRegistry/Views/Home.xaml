@@ -9,8 +9,8 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <TextBlock Text="ITS-RIZZOLI una strada per il futuro ..." 
-                   HorizontalAlignment="Center" Height="74" VerticalAlignment="Top" FontSize="48" FontWeight="Bold">
+        <TextBlock Text="Benvenuto!" 
+                   HorizontalAlignment="Center" Height="74" VerticalAlignment="Top" FontSize="48" FontWeight="Bold" SelectionChanged="TextBlock_SelectionChanged" Margin="0,448,0,0">
             <TextBlock.Foreground>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="White" Offset="1" />
@@ -20,6 +20,5 @@
                 </LinearGradientBrush>
             </TextBlock.Foreground>
         </TextBlock>
-        <Image Source="/Assets/Its_rizzoli_001.jpg" Stretch="UniformToFill" Margin="-5,95,0,0" />
     </Grid>
 </Page>
