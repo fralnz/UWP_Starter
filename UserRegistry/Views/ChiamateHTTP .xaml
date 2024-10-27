@@ -1,0 +1,35 @@
+﻿<Page
+    x:Class="UserRegistry.Views.Chiamate_HTTP"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:UserRegistry.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <StackPanel>
+            <Button x:Name="BtnHttpGetComments" Content="HTTPGET Comments [PlaceHolderJson]" Click="BtnHttpGetComments_Click">
+            </Button>
+        </StackPanel>
+        <ScrollViewer  Margin="16" BorderBrush="LightSlateGray" BorderThickness="5" VerticalScrollBarVisibility="Auto" Height="500">
+            <StackPanel>
+                <ListView x:Name="CommentListView">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding ID}" />
+                                <TextBlock Text="{Binding PostID}"/>
+                                <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding Email}" FontStyle="Italic"/>
+                                <TextBlock Text="{Binding Body}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <ProgressRing x:Name="CommentsLoadingRing" IsActive="False" MaxHeight="200" MaxWidth="200"/>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>
