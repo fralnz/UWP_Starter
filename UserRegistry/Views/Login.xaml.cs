@@ -181,33 +181,12 @@ namespace UserRegistry.Views
             return result;
         }
 
-        private string CheckSession()
-        {
-            string sessionFilePath = "session";
-            // Let's print the full path to see where it's actually looking
-            string fullPath = Path.GetFullPath(sessionFilePath);
-            Debug.WriteLine($"Looking for file at: {fullPath}");
-
-            // Print the current directory to understand the context
-            Debug.WriteLine($"Current Directory: {Directory.GetCurrentDirectory()}");
-
-            if (!File.Exists(sessionFilePath))
-            {
-                Debug.WriteLine("File not found!");
-                return "";
-            }
-
-            string sessionContent = File.ReadAllText(sessionFilePath);
-            Debug.WriteLine($"Session content: {sessionContent}");
-            return sessionContent;
-        }
-
         private async void CreateSession(string username)
         {
             try
             {
                 StorageFolder localFolder = ApplicationData.Current.LocalFolder;
-                StorageFile sessionFile = await localFolder.CreateFileAsync("session.txt", CreationCollisionOption.ReplaceExisting);
+                StorageFile sessionFile = await localFolder.CreateFileAsync("session", CreationCollisionOption.ReplaceExisting);
 
                 // Scrivi l'username nel file
                 await FileIO.WriteTextAsync(sessionFile, username);
@@ -225,9 +204,24 @@ namespace UserRegistry.Views
             File.Delete(sessionFilePath);
         }
 
-        private void loadSession()
+        private async void loadSession()
         {
-            string user = CheckSession();
+            StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+
+            // Open the existing file if it exists, or create a new one if it doesn't
+            StorageFile sessionFile = await localFolder.CreateFileAsync("session", CreationCollisionOption.OpenIfExists);
+
+            // Read content from the file
+            string user = await FileIO.ReadTextAsync(sessionFile);
+
+            if (string.IsNullOrEmpty(user))
+            {
+                Console.WriteLine("File is empty or contains no text.");
+            }
+            else
+            {
+                Console.WriteLine("File content: " + user);
+            }
             if (string.IsNullOrEmpty(user))
             {
                 return; // Nessuna sessione, tanto vale uscire
